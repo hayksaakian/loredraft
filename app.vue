@@ -26,10 +26,12 @@
     </div>
     <footer class="footer mt-auto py-3 bg-light">
       <div class="container">
-        <span class="text-muted">Created by Hayk Saakian</span>
-        <span class="text-muted float-end">
+        <span class="text-muted">Created by Hayk Saakian </span>
+        <span class="text-muted">
           <a href="https://twitter.com/hayksaakian">@hayksaakian</a>
         </span>
+        <span class="text-muted"> DM Me or @ me for suggestions</span>
+        <span class="text-muted float-end"><a href="https://lorcania.com/">Card Database Sourced from Lorcania</a></span>
       </div>
     </footer>
   </div>

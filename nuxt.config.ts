@@ -2,11 +2,11 @@
 export default defineNuxtConfig({
   // In Nuxt 3, you no longer need to specify the target as 'static' since it's default behavior
   // The devtools option is set to true by default in development mode, so you can omit it unless you want it enabled in production as well
-
+  ssr: true,
   // App meta configuration
   app: {
     head: {
-      title: 'loredraft',
+      title: 'Loredraft - Lorcana Draft Simulator - Practice Drafting Lorcana Cards',
       htmlAttrs: {
         lang: 'en',
       },
