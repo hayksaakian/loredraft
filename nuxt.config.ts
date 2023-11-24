@@ -40,7 +40,13 @@ export default defineNuxtConfig({
   modules: [
     // BootstrapVue is not yet available for Nuxt 3. You need to use Bootstrap 5 with Vue components
     '@pinia/nuxt',
+    'nuxt-gtag'
   ],
+
+  // Specify this in environment variables
+  // gtag: {
+  //   id: 'G-TDX0GBLYJR'
+  // },
 
   // Build Configuration
   build: {
