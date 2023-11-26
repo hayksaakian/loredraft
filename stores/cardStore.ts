@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia';
 
 import type { CardStoreState, Card } from '~/types/card'; // Import the interface
-import { CardSet, type DraftOptions } from '~/types/draftoptions';
+import { CardSet, type DraftOptions, defaultDraftOptions } from '~/types/draftoptions';
 
 const RARITIES = {
   Rare: 1, // 1 in every pack
@@ -11,12 +11,6 @@ const RARITIES = {
   Enchanted: 1 / 72, // 1 in 72 packs
 };
 
-const SETS = {
-  // The 6 card promo set isn't really draftable
-  // Promos: 1,
-  'THE_FIRST_CHAPTER': 2,
-  'RISE_OF_THE_FLOODBORN': 3
-}
 
 export const useCardStore = defineStore('cardStore', {
   state: (): CardStoreState => ({
@@ -25,8 +19,7 @@ export const useCardStore = defineStore('cardStore', {
     playerPacks: [] as Card[][][],
     draftPool: [],
     cuts: [],
-    podSize: 8,
-    packsPerPlayer: 4,
+    draft_options: defaultDraftOptions,
   }),
   actions: {
     async fetchCards() {
@@ -43,21 +36,26 @@ export const useCardStore = defineStore('cardStore', {
       }
     },
 
-    buildAllPacks(options: DraftOptions = {
-      card_set: CardSet.RiseOfTheFloodBorn,
-    }) {
-      // represents the number of players in a pod
-      const podSize = this.podSize;
-      // options for sealed, draft, and cube in the future
-      const packsPerPlayer = this.packsPerPlayer;
+    restartDraft(options: DraftOptions = defaultDraftOptions) {
+      // we assume cards are already loaded at this point
+      this.playerPacks = [] as Card[][][],
+      this.draftPool = [];
+      this.cuts = [];
+      this.pack = [];
+      this.draft_options = options;
+      this.buildAllPacks(options);
+    },
+
+    buildAllPacks(options: DraftOptions = defaultDraftOptions) {
+      console.log(`Building packs for ${options.pod_size} players, ${options.packs_per_player} packs per player`)
       // iterate on the podSize
-      for (let i = 0; i < podSize; i++) {
+      for (let i = 0; i < options.pod_size; i++) {
         // create an array of packs for each player
         const _playerPacks: Card[][] = [];
         // iterate on the packsPerPlayer
-        for (let j = 0; j < packsPerPlayer; j++) {
+        for (let j = 0; j < options.packs_per_player; j++) {
           // add a pack to the playerPacks array
-          _playerPacks.push(this.buildPack(options));
+          _playerPacks.push(this.buildPack(options.card_set));
         }
         // add the playerPacks array to the all_packs array
         this.playerPacks.push(_playerPacks);
@@ -66,15 +64,12 @@ export const useCardStore = defineStore('cardStore', {
       this.pack = this.playerPacks[0][0];
     },
 
-    buildPack(options: DraftOptions = {
-      card_set: CardSet.RiseOfTheFloodBorn,
-    }) {
+    buildPack(selectedSet: CardSet = CardSet.RiseOfTheFloodBorn) {
       // array of Card objects
-      const selectedSet = options.card_set;
       const newPack: Card[] = [];
 
       const setCards = this.cards.filter(card => card.card_set_id === selectedSet);
-      console.log(`Building Pack from Set Named ${selectedSet} with ${setCards.length} cards`)
+      console.log(`Building Pack from Set Named ${CardSet[selectedSet]}#${selectedSet} with ${setCards.length} cards`)
 
       const commonCards = setCards.filter(card => card.rarity === 'common');
       const uncommonCards = setCards.filter(card => card.rarity === 'uncommon');
@@ -182,8 +177,32 @@ export const useCardStore = defineStore('cardStore', {
       console.log(`After filtering: ${this.pack.map(c => c.name)}`);
     },
 
+    cutCard(card: Card) {
+      // add to cuts
+      this.cuts.push(card);
+      // remove from pool
+      console.log(`Before cutting ${card.name} from draftPool: ${this.draftPool.map(c => c.name)}`);
+      const cardIndex = this.draftPool.indexOf(card);
+      if (cardIndex !== -1) {
+        this.draftPool.splice(cardIndex, 1);
+      }
+      console.log(`After cutting ${card.name} from draftPool: ${this.draftPool.map(c => c.name)}`);
+    },
+
+    reAddCard(card: Card) {
+      // add to draft pool
+      this.draftPool.push(card);
+      // remove from cuts
+      console.log(`Before re-adding ${card.name} to draftPool: ${this.draftPool.map(c => c.name)}`);
+      const cardIndex = this.cuts.indexOf(card);
+      if (cardIndex !== -1) {
+        this.cuts.splice(cardIndex, 1);
+      }
+      console.log(`After re-adding ${card.name} to draftPool: ${this.draftPool.map(c => c.name)}`);
+    },
+
     passPack() {
-      const podSize = this.podSize; // Number of players
+      const podSize = this.draft_options.pod_size || defaultDraftOptions.pod_size; // Number of players
       // assuming this is run after the player (0) has picked their pack
       // pick the first card from each pack for each AI and remove it from the pack
       // do not add it to the Player's draft pool
@@ -211,7 +230,7 @@ export const useCardStore = defineStore('cardStore', {
         // Define the type for nextPlayerPacks
         const nextPlayerPacks: Card[][][] = new Array(podSize).fill(null).map(() => []);
 
-        console.log(`Rotating packs for ${this.podSize} players in the pod`);
+        console.log(`Rotating packs for ${podSize} players in the pod`);
         for (let currentPlayerID = 0; currentPlayerID < podSize; currentPlayerID++) {
           if (currentPlayerID >= this.playerPacks.length) {
             console.error(`Current player ID ${currentPlayerID} is out of bounds. Player packs length: ${this.playerPacks.length}, pod size: ${podSize}`);

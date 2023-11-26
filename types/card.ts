@@ -1,3 +1,5 @@
+import type { DraftOptions } from "./draftoptions";
+
 // Define an interface for the card prices from different markets
 export interface CardPrices {
   tcgplayer: {
@@ -61,6 +63,5 @@ export interface CardStoreState {
   playerPacks: Card[][][];
   draftPool: Card[];
   cuts: Card[];
-  podSize: number;
-  packsPerPlayer: number;
+  draft_options: DraftOptions;
 }

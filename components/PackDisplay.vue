@@ -28,7 +28,7 @@ const selectCard = (card) => {
 .pack {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: left;
   gap: 1rem;
 }
 
