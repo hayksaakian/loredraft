@@ -69,7 +69,7 @@ import { useCardStore } from '~/stores/cardStore';
 
 const cardStore = useCardStore();
 
-const set = ref(CardSet.TheFirstChapter)
+const set = ref(CardSet.RiseOfTheFloodBorn)
 const podSize = ref(defaultDraftOptions.pod_size)
 const packsPerPlayer = ref(defaultDraftOptions.packs_per_player)
 
