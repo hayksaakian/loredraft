@@ -60,6 +60,7 @@ export interface CardStoreState {
   pack: Card[];
   playerPacks: Card[][][];
   draftPool: Card[];
+  cuts: Card[];
   podSize: number;
   packsPerPlayer: number;
 }

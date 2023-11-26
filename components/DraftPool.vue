@@ -10,6 +10,14 @@
         </div>
       </div>
     </div>
+    <div class="draft-pool">
+      <div v-for="cost in 6" :key="cost" class="draft-column">
+        <h3>{{ getCardsByCost(cost).length }} at Cost {{ cost }}</h3>
+        <div v-for="card in getCardsByCost(cost)" :key="card.id">
+          <CardDisplay :card="card" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -24,6 +32,12 @@ const getCardsByCost = (cost: number): Card[] => {
   // Ensure that the return value is typed as an array of Cards
   return store.draftPool.filter((card) => card.cost === cost || (cost === 6 && card.cost >= cost));
 };
+
+const getCutsByCost = (cost: number): Card[] => {
+  // Ensure that the return value is typed as an array of Cards
+  return store.cuts.filter((card) => card.cost === cost || (cost === 6 && card.cost >= cost));
+};
+
 </script>
 
 <style scoped>

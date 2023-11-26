@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia';
 
 import type { CardStoreState, Card } from '~/types/card'; // Import the interface
+import { CardSet, type DraftOptions } from '~/types/draftoptions';
 
 const RARITIES = {
   Rare: 1, // 1 in every pack
@@ -10,21 +11,31 @@ const RARITIES = {
   Enchanted: 1 / 72, // 1 in 72 packs
 };
 
+const SETS = {
+  // The 6 card promo set isn't really draftable
+  // Promos: 1,
+  'THE_FIRST_CHAPTER': 2,
+  'RISE_OF_THE_FLOODBORN': 3
+}
+
 export const useCardStore = defineStore('cardStore', {
   state: (): CardStoreState => ({
     cards: [],
     pack: [],
     playerPacks: [] as Card[][][],
     draftPool: [],
+    cuts: [],
     podSize: 8,
     packsPerPlayer: 4,
   }),
   actions: {
     async fetchCards() {
-      const response = await fetch('/cards/set2.json');
+      const response = await fetch('/cards/all.json');
       if (response.ok) {
         const data: Card[] = await response.json();
         // Cast the response data to the Card[] type
+        // Future: only fetch the set you need
+        // for now there's only 2 sets so this is fine.
         this.cards = data;
       } else {
         console.error(`Failed to fetch cards: ${response.status}`);
@@ -32,7 +43,9 @@ export const useCardStore = defineStore('cardStore', {
       }
     },
 
-    buildAllPacks() {
+    buildAllPacks(options: DraftOptions = {
+      card_set: CardSet.RiseOfTheFloodBorn,
+    }) {
       // represents the number of players in a pod
       const podSize = this.podSize;
       // options for sealed, draft, and cube in the future
@@ -44,7 +57,7 @@ export const useCardStore = defineStore('cardStore', {
         // iterate on the packsPerPlayer
         for (let j = 0; j < packsPerPlayer; j++) {
           // add a pack to the playerPacks array
-          _playerPacks.push(this.buildPack());
+          _playerPacks.push(this.buildPack(options));
         }
         // add the playerPacks array to the all_packs array
         this.playerPacks.push(_playerPacks);
@@ -53,18 +66,23 @@ export const useCardStore = defineStore('cardStore', {
       this.pack = this.playerPacks[0][0];
     },
 
-    buildPack() {
+    buildPack(options: DraftOptions = {
+      card_set: CardSet.RiseOfTheFloodBorn,
+    }) {
       // array of Card objects
+      const selectedSet = options.card_set;
       const newPack: Card[] = [];
 
-      const commonCards = this.cards.filter(card => card.rarity === 'common');
-      const uncommonCards = this.cards.filter(card => card.rarity === 'uncommon');
-      const rareCards = this.cards.filter(card => card.rarity === 'rare');
-      const superRareCards = this.cards.filter(card => card.rarity === 'super_rare');
-      const legendaryCards = this.cards.filter(card => card.rarity === 'legendary');
-      const enchantedCards = this.cards.filter(card => card.rarity === 'enchanted');
+      const setCards = this.cards.filter(card => card.card_set_id === selectedSet);
+      console.log(`Building Pack from Set Named ${selectedSet} with ${setCards.length} cards`)
+
+      const commonCards = setCards.filter(card => card.rarity === 'common');
+      const uncommonCards = setCards.filter(card => card.rarity === 'uncommon');
+      const rareCards = setCards.filter(card => card.rarity === 'rare');
+      const superRareCards = setCards.filter(card => card.rarity === 'super_rare');
+      const legendaryCards = setCards.filter(card => card.rarity === 'legendary');
+      const enchantedCards = setCards.filter(card => card.rarity === 'enchanted');
       // log how many cards are in each rarity
-      console.log(`${this.cards.length} total cards`);
       console.log(`${commonCards.length} commons`);
       console.log(`${uncommonCards.length} uncommons`);
       console.log(`${rareCards.length} rares`);
@@ -146,7 +164,7 @@ export const useCardStore = defineStore('cardStore', {
     },
 
     // generatePack() {
-    //   if (this.cards.length == 0) {
+    //   if (setCards.length == 0) {
     //     return
     //   }
     //   // refers to the currently "displayed" pack
