@@ -1,3 +1,4 @@
+<!-- PackDisplay.vue -->
 <template>
   <div v-if="pack.length > 0">
     <h2>Pack of {{ pack.length }} Cards</h2>

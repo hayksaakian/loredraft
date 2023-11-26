@@ -95,7 +95,7 @@ const restartDraft = () => {
     pod_size: podSize.value, 
     packs_per_player: packsPerPlayer.value 
   };
-  cardStore.buildAllPacks(options);
+  cardStore.restartDraft(options);
 }
 
 </script>

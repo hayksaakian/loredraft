@@ -14,9 +14,9 @@ const RARITIES = {
 
 export const useCardStore = defineStore('cardStore', {
   state: (): CardStoreState => ({
+    playerPacks: [] as Card[][][],
     cards: [],
     pack: [],
-    playerPacks: [] as Card[][][],
     draftPool: [],
     cuts: [],
     draft_options: defaultDraftOptions,
@@ -38,7 +38,7 @@ export const useCardStore = defineStore('cardStore', {
 
     restartDraft(options: DraftOptions = defaultDraftOptions) {
       // we assume cards are already loaded at this point
-      this.playerPacks = [] as Card[][][],
+      this.playerPacks = [] as Card[][][];
       this.draftPool = [];
       this.cuts = [];
       this.pack = [];
@@ -58,13 +58,15 @@ export const useCardStore = defineStore('cardStore', {
           _playerPacks.push(this.buildPack(options.card_set));
         }
         // add the playerPacks array to the all_packs array
+        console.log(`Before: Player ${i} has ${this.playerPacks.length} packs`)
         this.playerPacks.push(_playerPacks);
+        console.log(`After: Player ${i} has ${this.playerPacks.length} packs`)
       }
       // set the current pack to the first pack of the first player
       this.pack = this.playerPacks[0][0];
     },
 
-    buildPack(selectedSet: CardSet = CardSet.RiseOfTheFloodBorn) {
+    buildPack(selectedSet: CardSet = CardSet.RiseOfTheFloodBorn): Card[] {
       // array of Card objects
       const newPack: Card[] = [];
 
@@ -108,9 +110,6 @@ export const useCardStore = defineStore('cardStore', {
       } else {
         newPack.push(rareCards[Math.floor(Math.random() * rareCards.length)]);
       }
-      // Log the current list of cards by name
-      console.log(`${newPack.length} Cards in pack`);
-      console.log(newPack.map(card => card.name));
 
       // explicitly mark all the cards added so far as .foil = false
       for (const card of newPack) {
@@ -153,7 +152,10 @@ export const useCardStore = defineStore('cardStore', {
       // Add the copied card to the newPack array
       newPack.push(foilCard);
       newPack.reverse();
-      console.log('Foil card selected:', foilCard);
+      // console.log('Foil card selected:', foilCard);
+      // Log the current list of cards by name
+      console.log(`${newPack.length} Cards in pack`);
+      console.log(newPack.map(card => card.name));
 
       return newPack;
     },
